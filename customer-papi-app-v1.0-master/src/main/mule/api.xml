@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <flow name="api-main">
+        <http:listener path="/api/*" config-ref="http-listner">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="api-config"/>
+        <error-handler ref="global-errorError_Handler">
+        </error-handler>
+    </flow>
+    <flow name="api-console">
+        <http:listener path="/console/*" config-ref="http-listner">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="api-config"/>
+        <error-handler ref="global-errorError_Handler">
+            
+        </error-handler>
+    </flow>
+    <flow name="patch:\customers:application\json:api-config">
+		<flow-ref doc:name="initialise-request-data-subFlow" doc:id="dec35ecd-a9e2-4519-b4b0-a218c1d722a4" name="initialise-request-data-subFlow" />
+		<logger level="INFO" doc:name="Start" doc:id="9dcfd06c-61f4-4819-b540-901b2c6995cf" message='Start FLOW #[flow.name] "Calling data-syncFlow" -- #[now()]' />
+		<flow-ref doc:name="data-syncFlow" doc:id="94b399de-7af4-4b24-aa02-c58a011c20f4" name="data-syncFlow" />
+		<logger level="INFO" doc:name="End" doc:id="fb6eef09-67e9-4e65-8ee7-d6093f4099e5" message='END FLOW #[flow.name] "data-syncFlow Calling" -- #[now()]'/>
+		
+    </flow>
+	<flow name="patch:\customers\status:application\json:api-config">
+		<flow-ref doc:name="initialise-request-data-subFlow" doc:id="0974c39d-3c2b-445a-a5a8-dc18844a27f6" name="initialise-request-data-subFlow" />
+		<logger level="INFO" doc:name="Start" doc:id="35b13540-a4d5-4036-9cc0-7e1327fe5ac2" message='Start FLOW #[flow.name] "Calling status-syncFlow" -- #[now()]' />
+		<flow-ref doc:name="status-syncFlow" doc:id="5e2efbb2-0279-40e4-9a65-5d7d9aea00a8" name="status-syncFlow"/>
+		<logger level="INFO" doc:name="End" doc:id="9389f019-e45d-4fe1-81ec-d252b390e650" message='END FLOW #[flow.name] "status-syncFlow Calling" -- #[now()]'/>
+		
+    
+    </flow>
+</mule>

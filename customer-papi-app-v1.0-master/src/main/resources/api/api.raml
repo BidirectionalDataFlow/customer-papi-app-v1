@@ -1,0 +1,37 @@
+#%RAML 1.0
+title: CustomerData-papi-raml
+description: This is Record File.
+version: v1
+protocols:
+  - HTTP
+  - HTTPS
+types:
+    patchCustomerRequest: !include /Datatypes/patch-customer-request-dataType.raml
+    patchCustomerResponse: !include /Datatypes/patch-customer-response-dataType.raml
+    patchStatusRequest: !include /Datatypes/patch-status-request-dataType.raml
+    patchStatusResponse: !include /Datatypes/patch-status-response-dataType.raml
+    commonError: !include /Datatypes/error-dataType.raml
+/customers:
+  patch:
+    body:
+      application/json:
+        type:  patchCustomerRequest
+        example: !include /examples/patch-customer-request-example.json
+    responses:
+      200:
+       body:
+        application/json:
+          type: patchCustomerResponse
+          example: !include /examples/patch-customer-response-example.json
+  /status:
+    patch:
+      body:
+        application/json:
+          type: patchStatusRequest
+          example: !include /examples/patch-status-request-example.json
+      responses:
+        200:
+          body:
+            application/json:
+              type: patchStatusResponse
+              example: !include /examples/patch-status-response-example.json

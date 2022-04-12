@@ -1,0 +1,14 @@
+%dw 2.0
+
+type auto_e72e1ce5_955d_455f_b39e_03cef5bb823d_Output_Payload = {
+  msg: String, 
+  eventId: String, 
+  code: Number, 
+  payload: {
+    success: Boolean, 
+    _?: Any
+  } {"description": "This object will contain response error."}, 
+  success: Boolean, 
+  _?: Any
+}
+

@@ -1,0 +1,11 @@
+{
+  "msg": "successful operation",
+  "code": 401,
+  "success": true,
+  "eventId": "dbfhjsdbhfbdo8ryt876t75ty",
+  "error": {
+    "type": "UNAUTHORIZED",
+    "title": "Unauthorized",
+    "details": "This endpoint requires all requests to be authenticated"
+  }
+}

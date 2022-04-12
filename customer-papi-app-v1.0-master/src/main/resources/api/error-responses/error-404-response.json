@@ -1,0 +1,11 @@
+{
+  "msg": "successful operation",
+  "code": 404,
+  "success": true,
+  "eventId": "dbfhjsdbhfbdo8ryt876t75ty",
+  "error": {
+    "type": "NOT_FOUND",
+    "title": "Resource not found",
+    "details": "The URI requested is invalid or the resource requested does not exists"
+  }
+}

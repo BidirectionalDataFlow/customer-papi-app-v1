@@ -1,0 +1,15 @@
+http:
+  host: "0.0.0.0"
+  port: "8082"
+  
+sapi:
+  host: "0.0.0.0"
+  port: "8081"
+  path:
+    customers: "/api/customers"
+    customerStatus: "/api/customers/status"
+    
+cron:
+  freq: "0 0/30 * 1/1 * ? *"
+
+autodiscoveryId: "17708562"
