@@ -1,0 +1,12 @@
+{
+  "customerResponse": [
+    {
+      "customerId": "customer001",
+      "status": "true"
+    },
+    {
+      "customerId": "customer002",
+      "status": "true"
+    }
+  ]
+}

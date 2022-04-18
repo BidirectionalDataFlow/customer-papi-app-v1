@@ -1,0 +1,46 @@
+#%RAML 1.0 DataType
+
+
+type: object
+properties:
+  customerRequest:
+    type: array
+    items:
+      type: object
+      properties:
+        customerId:
+          description: This field defines Customer  ID 
+          type: string
+          required: true
+        customerName:
+          description: This field defines customerName 
+          type: string
+          required: true
+        address:
+          description: This field defines Customer  address 
+          type: string
+          required: true
+        email:
+          description: This field defines Customer  email 
+          type: string
+          required: true
+        dob:
+          description: This field defines Customer  dob 
+          type: string
+          required: true        
+        phone:
+          description: This field defines Customer  phone 
+          type: string
+          required: true
+        gender:
+          description: This field defines Customer  gender 
+          type: string
+          required: true
+        status:
+          description: This field defines Customer  status 
+          type: string
+          required: true
+        registrationDateTime:
+          description: This field defines registrationDateTime 
+          type: string
+          required: true

@@ -1,0 +1,10 @@
+#%RAML 1.0 Library
+
+traits:
+  commonHeader: !include trait/common-header.raml
+  commonError: !include trait/common-error-response.raml
+  
+types:
+  eroroResponse: !include dataType/common/error-response-dataType.raml
+  postCustomerRequest: !include dataType/customer/post-customer-request-dataType.raml
+  postCustomerResponse: !include dataType/customer/post-customer-response-dataType.raml

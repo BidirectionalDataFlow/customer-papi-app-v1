@@ -1,0 +1,26 @@
+{
+  "customerRequest": [
+    {
+      "customerId": "Customer1001",
+      "customerName": "Name1001",
+      "address": "House1001",
+      "email": "email1001@gmail.com",
+      "dob": "21-12-2001",
+      "phone": "2378643501",
+      "gender": "Female",
+      "status": "false",
+      "registrationDateTime": "12-02-2233T12:23:01"
+    },
+    {
+      "customerId": "Customer1002",
+      "customerName": "Name1002",
+      "address": "House1002",
+      "email": "email1002@gmail.com",
+      "dob": "21-12-2002",
+      "phone": "2378643502",
+      "gender": "Female",
+      "status": "false",
+      "registrationDateTime": "12-02-2233T12:23:02"
+    }
+  ]
+}

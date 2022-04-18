@@ -1,0 +1,49 @@
+#%RAML 1.0
+title: customer-Papi-Raml
+version: v1.0
+description: These apis are used for customer PAPI
+protocols: [HTTP, HTTPS]
+
+uses:
+  common-library: /exchange_modules/64a36826-7473-4842-a35d-b4dc9635fc5c/common-fragment/1.0.6/common-fragment.raml
+  
+
+
+
+/customers:
+  post:
+    is:
+      - common-library.commonHeader
+      - common-library.commonError
+    body:
+      application/json:
+        type: common-library.postCustomerRequest
+        example: !include /exchange_modules/64a36826-7473-4842-a35d-b4dc9635fc5c/common-fragment/1.0.6/example/customer/post-customer-request-example.json
+    responses:
+          201:
+            body:
+              application/json:
+                type: common-library.postCustomerResponse      
+                example: !include /exchange_modules/64a36826-7473-4842-a35d-b4dc9635fc5c/common-fragment/1.0.6/example/customer/post-customer-response-example.json
+   
+                    
+
+       
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+
+
+
