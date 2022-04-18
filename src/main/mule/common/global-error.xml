@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
-   <flow name="customer-papi-raml-main">
-        <http:listener config-ref="customer-papi-raml-httpListenerConfig" path="/api/*">
-            <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
-            </http:response>
-            <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
-            </http:error-response>
-        </http:listener>
-        <apikit:router config-ref="customer-papi-raml-config" />
-        <error-handler>
-            <on-error-propagate type="APIKIT:BAD_REQUEST">
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<error-handler name="global-errorError-handler-apikit" doc:id="5f6bc1fb-910c-4fb7-b028-192f3db17024" >
+	<on-error-propagate type="APIKIT:BAD_REQUEST">
                 <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
@@ -90,36 +84,47 @@ output application/json
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
-        </error-handler>
-    </flow>
-    <flow name="customer-papi-raml-console">
-        <http:listener config-ref="customer-papi-raml-httpListenerConfig" path="/console/*">
-            <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
-            </http:response>
-            <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
-            </http:error-response>
-        </http:listener>
-        <apikit:console config-ref="customer-papi-raml-config" />
-        <error-handler>
-            <on-error-propagate type="APIKIT:NOT_FOUND">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-                    <ee:message>
-                        <ee:set-payload><![CDATA[%dw 2.0
+	</error-handler>
+	<error-handler name="global-errorError-handler-app" doc:id="6ef33db2-55cf-43ce-bef4-140fc6073114" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="7e87350d-e6f8-4afd-b1b2-9255b1948176" >
+		<choice doc:name="Choice" doc:id="fdb13cfc-1e3e-422c-b4b5-b5a325bb6581" >
+				<when expression='#[payload.msg  != "failed operation from SFDC"]'>
+					<logger level="INFO" doc:name="Logger Error" doc:id="673c3181-24ef-4755-a0b8-323f8d6aaf8c" message='#[%dw 2.0
+&#10;output application/json indent = false  
+&#10;---  
+&#10;{  	
+&#10;    TimeStamp: now(), 	
+&#10;    transactionId: vars.requestData.requestHeader.transactionid, 	
+&#10;    AppName: app.name, 	
+&#10;    BusinessProcessName:  "Customer Registration", 	
+&#10;    Category:  "Customer", 	
+&#10;    OriginatingApplication:  "PAPI", 	
+&#10;    DesinationApplication:  "SFDC", 	
+&#10;    CustomerId: "NA", 	
+&#10;    txnState:  "ERROR" 
+&#10;}]' />
+					<ee:transform doc:name="Transform Message Error" doc:id="947c257e-b0c8-49d3-9247-41050eab35e9">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{message: "Resource not found"}]]></ee:set-payload>
-                    </ee:message>
-                    <ee:variables>
-                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
-                    </ee:variables>
-                </ee:transform>
-            </on-error-propagate>
-        </error-handler>
-    </flow>
-    <flow name="post:\customers:application\json:customer-papi-raml-config">
-		<flow-ref doc:name="Flow Reference" doc:id="5271ceb1-169a-4b02-9bce-5e2a6f2a7a3a" name="post-customer-implementationFlow"/>
-    </flow>
+{
+	"msg": "failed operation",
+	"code": 500,
+	"eventId": vars.requestData.requestHeader.transactionid,
+	"error": {
+		"type": error.errorType.identifier,
+		"title": error.description,
+		"details": error.detailedDescription
+	}
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				</when>
+			</choice>
+		</on-error-propagate>
+	</error-handler>
 </mule>

@@ -1,0 +1,7 @@
+%dw 2.0
+
+type auto_28d7b903_2e44_4f2c_8d1f_7a4095791877_Input_Payload = {
+  customerRequest: Array<{    registrationDateTime: String,     address: String,     gender: String,     phone: String,     dob: String,     customerId: String,     customerName: String,     email: String,     status: String,     _?: Any  }>, 
+  _?: Any
+}
+

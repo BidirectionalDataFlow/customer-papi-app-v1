@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="initialize-request-data-subFlow" doc:id="f9b051b1-e936-4c09-ab14-601701bb3239" >
+		<ee:transform doc:name="Transform Message" doc:id="1487efaf-8025-48fe-b56e-45badd2ae751" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="requestData" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	requestPayload: message.payload,
+	requestQueryParam: message.attributes.queryParams,
+	requestUriParam: message.attributes.uriParams,
+	requestHeader: message.attributes.headers,
+	startTime: now()
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</sub-flow>
+</mule>
