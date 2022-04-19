@@ -123,4 +123,5 @@ type auto_28d7b903_2e44_4f2c_8d1f_7a4095791877_Input_Payload = {
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
+  <types:enrichment select="#d9032a96-6cb4-41e8-ada6-38c386d99482"/>
 </types:mule>

@@ -28,7 +28,7 @@ vars.requestData.requestPayload.customerRequest map((item,index)->{
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger before SFDC call" doc:id="78730ee9-1e6a-413b-a38e-58f0e29a0af4" message='#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.requestData.requestHeader.transactionid, 	&#10;    AppName: app.name, 	&#10;    BusinessProcessName:  "Customer Registration", 	&#10;    Category:  "Customer", 	&#10;    OriginatingApplication:  "PAPI", 	&#10;    DesinationApplication:  "SFDC", 	&#10;    CustomerId: "NA", 	&#10;    txnState:  "SFDC Request" &#10;}]'/>
-		<http:request method="GET" doc:name="Request" doc:id="4ccbfc5e-09c7-499c-b29b-3a0dc24bd1f0" config-ref="HTTP_Request_configuration" path="${sapi.pathPostCustomer}" responseTimeout="9000000">
+		<http:request method="POST" doc:name="Request" doc:id="4ccbfc5e-09c7-499c-b29b-3a0dc24bd1f0" config-ref="HTTP_Request_configuration" path="${sapi.pathPostCustomer}" responseTimeout="9000000">
 			<http:headers ><![CDATA[#[output application/java
 ---
 {
