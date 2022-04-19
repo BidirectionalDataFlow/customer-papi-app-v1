@@ -7,28 +7,8 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<flow name="post-customer-implementationFlow" doc:id="28d7b903-2e44-4f2c-8d1f-7a4095791877" >
-		<ee:transform doc:name="Transform Message Request SFDC" doc:id="68af8de5-f8df-4abf-9840-cc7f040db491" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-vars.requestData.requestPayload.customerRequest map((item,index)->{
-	customerId__c : item.customerId,
-	customerName__c: item.customerName,
-	email__c: item.email,
-	phone__c: item.phone,
-	address__c: item.address,
-	dob__c: item.dob,
-	gender__c: item.gender,
-	status__c: item.status,
-	registrationDateTime__c: item.registrationDateTime,
-	lastModifiedDateTime__c: now() as String {format : "dd-MM-yyyy'T'hh:mm:ss"}
-	
-})]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
 		<logger level="INFO" doc:name="Logger before SFDC call" doc:id="78730ee9-1e6a-413b-a38e-58f0e29a0af4" message='#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.requestData.requestHeader.transactionid, 	&#10;    AppName: app.name, 	&#10;    BusinessProcessName:  "Customer Registration", 	&#10;    Category:  "Customer", 	&#10;    OriginatingApplication:  "PAPI", 	&#10;    DesinationApplication:  "SFDC", 	&#10;    CustomerId: "NA", 	&#10;    txnState:  "SFDC Request" &#10;}]'/>
-		<http:request method="POST" doc:name="Request" doc:id="4ccbfc5e-09c7-499c-b29b-3a0dc24bd1f0" config-ref="HTTP_Request_configuration" path="${sapi.pathPostCustomer}" responseTimeout="9000000">
+		<http:request method="POST" doc:name="Request" doc:id="4ccbfc5e-09c7-499c-b29b-3a0dc24bd1f0" config-ref="HTTP_Request_configuration_CustomerSAPI" path="${sapi.pathPostCustomer}" responseTimeout="9000000">
 			<http:headers ><![CDATA[#[output application/java
 ---
 {
@@ -38,20 +18,6 @@ vars.requestData.requestPayload.customerRequest map((item,index)->{
 }]]]></http:headers>
 		</http:request>
 		<logger level="INFO" doc:name="Logger after SFDC call" doc:id="57203d0f-352c-4739-8a5a-5a9b17936b7a" message='#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.requestData.requestHeader.transactionid, 	&#10;    AppName: app.name, 	&#10;    BusinessProcessName:  "Customer Registration", 	&#10;    Category:  "Customer", 	&#10;    OriginatingApplication:  "PAPI", 	&#10;    DesinationApplication:  "SFDC", 	&#10;    CustomerId: "NA", 	&#10;    txnState:  "SFDC Response" &#10;}]'/>
-		<ee:transform doc:name="Transform Message Response" doc:id="d0c8d694-d4b1-4595-a0ed-884b89c1f069" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-  customerResponse: payload.items map((item,index)->
-    {
-      customerId: vars.requestData.requestPayload.customerRequest[index].customerId,
-      status: item.successful
-    })
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="cfc63861-1b5e-443a-abcb-003019daf1f7" type="HTTP:BAD_GATEWAY, HTTP:BAD_REQUEST, HTTP:CLIENT_SECURITY, HTTP:CONNECTIVITY, HTTP:FORBIDDEN, HTTP:INTERNAL_SERVER_ERROR, HTTP:METHOD_NOT_ALLOWED, HTTP:NOT_ACCEPTABLE, HTTP:NOT_FOUND, HTTP:PARSING, HTTP:RETRY_EXHAUSTED, HTTP:SECURITY, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:TOO_MANY_REQUESTS, HTTP:UNAUTHORIZED, HTTP:UNSUPPORTED_MEDIA_TYPE">
 				<logger level="INFO" doc:name="Logger Error" doc:id="5cdbfd36-eb0d-4988-9633-c14020646a30" message='#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.requestData.requestHeader.transactionid, 	&#10;    AppName: app.name, 	&#10;    BusinessProcessName:  "Customer Registration", 	&#10;    Category:  "Customer", 	&#10;    OriginatingApplication:  "PAPI", 	&#10;    DesinationApplication:  "SFDC", 	&#10;    CustomerId: "NA", 	&#10;    txnState:  "ERROR" &#10;}]'/>

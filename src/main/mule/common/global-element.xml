@@ -22,7 +22,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	
 	
 	<global-property doc:name="Global Property" doc:id="40dff80e-d6c0-47c8-82bc-44fc15b19964" name="secureKey" value="mulesoft123" />
-	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="f7134bf8-7477-4292-8f49-64b29f78a711" basePath="/api">
+	<http:request-config name="HTTP_Request_configuration_CustomerSAPI" doc:name="HTTP Request configuration" doc:id="f7134bf8-7477-4292-8f49-64b29f78a711">
 		<http:request-connection host="${sapi.host}" port="${sapi.port}" />
 	</http:request-config>
 	
