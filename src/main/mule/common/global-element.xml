@@ -1,30 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
-	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
-	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
 http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
-http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
-http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
-	<configuration-properties doc:name="Configuration properties" doc:id="7f042ce4-86af-498d-bdb2-b5c428eac0c5" file="properties/application/${mule.env}.yaml" />
-	<global-property doc:name="Global Property" doc:id="4ca714f8-5554-4450-a0f6-9d95689f814f" name="mule.env" value="local" />
-	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="7100c602-f3e8-4f88-8d07-0860449c5d7b" file="properties/secret/${mule.env}.yaml" key="${secureKey}" >
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<http:request-config name="HTTP_Customer_SAPI_Request_configuration" doc:name="HTTP Request configuration" doc:id="d3775519-0a8b-4613-accd-0a4ec906bb5c" basePath="${base.path}" responseTimeout="${reponse.timeout}">
+		<http:request-connection host="${sapi.host}" port="${sapi.port}" />
+	</http:request-config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="1747947d-4f8e-4845-9b00-db0e9547861c" />
+	
+	<configuration-properties doc:name="Configuration properties" doc:id="f8ed8113-31ef-499a-b33a-db80726d5699" file="properties/application/${mule.env}.yaml" />
+	<os:config name="ObjectStore_Config" doc:name="ObjectStore Config" doc:id="41e6264d-ed85-43a9-82e0-fb3d8ce6e0e3" >
+		<os:connection >
+			<reconnection >
+				<reconnect />
+			</reconnection>
+		</os:connection>
+	</os:config>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="8f01ef64-40d5-4c82-bdc6-3c896648d645" file="properties/secret/${mule.env}.yaml" key="${secureKey}" >
 		<secure-properties:encrypt algorithm="Blowfish" />
 	</secure-properties:config>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="2f6390a3-72d6-4d01-8b2c-e94801b785ec" >
+		<email:smtp-connection host="${email.host}" port="${email.port}" user="${email.user}" password="${secure::email.password}" >
+			<reconnection >
+				<reconnect frequency="${reconnection.freq}" count="${reconnection.attempts}" />
+			</reconnection>
+			<email:properties >
+				<email:property key="${email.starttls}" value="${email.connection}" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	
+	<global-property doc:name="Global Property" doc:id="7536246f-ee8e-4a49-ac1b-c7d159f6e75f" name="mule.env" value="local" />
 	 <http:listener-config name="customer-papi-raml-httpListenerConfig">
         <http:listener-connection host="${http.host}" port="${http.port}" />
     </http:listener-config>
     <apikit:config name="customer-papi-raml-config" api="customer-papi-raml.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
 	
 	
-	<global-property doc:name="Global Property" doc:id="40dff80e-d6c0-47c8-82bc-44fc15b19964" name="secureKey" value="mulesoft123" />
-	<http:request-config name="HTTP_Request_configuration_CustomerSAPI" doc:name="HTTP Request configuration" doc:id="f7134bf8-7477-4292-8f49-64b29f78a711">
-		<http:request-connection host="${sapi.host}" port="${sapi.port}" />
-	</http:request-config>
-	
-    
+	<global-property doc:name="Global Property" doc:id="2c2f2fc4-13ad-4f5e-a700-ba575e952279" name="secureKey" value="mulesoft123" />
 </mule>

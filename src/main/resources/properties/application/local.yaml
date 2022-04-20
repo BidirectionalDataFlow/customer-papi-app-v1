@@ -1,10 +1,41 @@
-instanceId: ""
-
+cron:
+  expression: "0 00 17 * * ?"
 http:
   host: "0.0.0.0"
   port: "8082"
-  
+
 sapi:
   host: "localhost"
   port: "8081"
-  pathPostCustomer: "api/customers"
+  pathCustomerStatus: "/customers/status"
+  pathCustomer: "/customers"
+
+base:
+  path: "/api"
+
+batch:
+  aggregator:
+    size: "200"
+  block: 
+    size: "500"
+
+email:
+  host: "smtp.gmail.com"
+  port: "587"
+  user: "ritendra.28@gmail.com"
+  starttls: "mail.smtp.starttls.enable"
+  connection: "true"
+  from:
+    address: "ritendra.28@gmail.com"  
+  to:
+    address: "ritendra.dhakciya@apisero.com"
+  subject: "failed records while updating from DB to SFDC"
+  encoding: "Base64"
+
+reconnection:
+  freq: "5000"
+  attempts: "2"
+
+reponse:
+  timeout: "30000"
+  mpts: "2"

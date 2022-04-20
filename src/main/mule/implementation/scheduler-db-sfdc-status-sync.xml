@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<flow name="scheduler-db-sfdc-status-sync-flow" doc:id="b69e5888-df81-4909-82a3-5dc41412aaa9" >
+		<scheduler doc:name="Customer-Scheduler" doc:id="b973b59c-f14e-48cf-931c-1885ade5b376" >
+			<scheduling-strategy >
+				<cron expression="${cron.expression}" />
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="Customer Process Flow : Update process started " doc:id="d132c352-fb05-4c7f-b2ec-2cd65ba5576e" message="Customer Process Flow : Update process started "/>
+		<set-variable value="#[uuid()]" doc:name="Set transactionId" doc:id="0e100c43-1178-4ac1-abcd-ed11617f3abf" variableName="transactionId"/>
+		<os:retrieve doc:name="Retrieve lastModifiedDateTime" doc:id="4ce0ad1b-543a-4751-992b-6f8b30cde4ab" key="lastModifiedDateTime" objectStore="Object_store" target="lastModifiedDate">
+			<os:default-value ><![CDATA[#[//now() as String {format: "dd-MM-yyyy'T'HH:mm:ss"}
+
+"02-04-2022T12:23:01"]]]></os:default-value>
+		</os:retrieve>
+		<set-variable value="02-04-2022T12:23:01" doc:name="Set Variable" doc:id="0842f269-1358-46f8-8f54-60914ca4217d" variableName="lastModifiedDate"/>
+		<logger level="INFO" doc:name="Logger Before DB Call" doc:id="b0d6d928-2e75-463e-a6d7-1791ba34d3bb" message='#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.transactionid, 	&#10;    AppName: app.name, 	&#10;    BusinessProcessName:  "Customer Registration", 	&#10;    Category:  "Customer", 	&#10;    OriginatingApplication:  "Process Flows", 	&#10;    DesinationApplication:  "DB", 	&#10;    txnState:  "DB Request" &#10;}]'/>
+		<http:request method="GET" doc:name="HTTP : Get Customers from DB" doc:id="7a22dfbb-a481-4596-a0a7-6004d7df026e" config-ref="HTTP_Customer_SAPI_Request_configuration" path="${sapi.pathCustomerStatus}">
+			<http:headers ><![CDATA[#[{
+	
+	transactionId : vars.transactionId,
+	clientId : p('secure::clientId'),
+	clientSecret : p('secure::clientSecret')
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[{
+	lastModifiedDateTime : vars.lastModifiedDate
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger After DB Call" doc:id="c02c8de5-b96b-4f7f-be42-345012356049" message='#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.transactionid, 	&#10;    AppName: app.name, 	&#10;    BusinessProcessName:  "Customer Registration", 	&#10;    Category:  "Customer", 	&#10;    OriginatingApplication:  "Process Flows", 	&#10;    DesinationApplication:  "DB", 		&#10;    txnState:  "DB Response" &#10;}]' />
+		<ee:transform doc:name="JSON to JAVA Object" doc:id="f3ab6555-c817-4b3f-81a7-c6600a9af774" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="db-sfdc-sync-batch-flow" doc:id="40f5b7e6-d150-4a4b-9d0d-76c56695fe6d" name="db-sfdc-sync-batch-flow"/>
+		<logger level="INFO" doc:name="Log Update payload" doc:id="d1a68e2f-9a4b-4e13-a706-a79986030447" message="#[output application/json --- payload]"/>
+		<os:store doc:name="Store lastModifiedDateTime" doc:id="c783047c-8b63-4f52-b6d1-ed557833d467" objectStore="Object_store" key="lastModifiedDateTime">
+			<os:value ><![CDATA[#[(now() - |PT5M|) as String {format: "dd-MM-yyyy'T'HH:mm:ss"}]]]></os:value>
+		</os:store>
+		<logger level="INFO" doc:name="Customer Process Flow : Update process completed" doc:id="96e05044-2c94-4270-ab45-3f13496f4b0e" message="Customer Process Flow : Update process completed"/>
+	</flow>
+	<flow name="db-sfdc-sync-batch-flow" doc:id="2fc9e222-4099-44f0-8909-758e0a970325" >
+		<batch:job jobName="db-sfdc-sync-job" doc:id="ad71511e-450f-4b8c-9849-7db67b9a35ce" blockSize="${batch.block.size}" maxFailedRecords="-1">
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="15d2b29a-d750-451a-b869-7b5923431de4" >
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="bbce5867-bb56-4d9f-a8fb-d59990d2e738" size="${batch.aggregator.size}">
+						<ee:transform doc:name="DB to SFDC mapping" doc:id="7ea0e42c-e583-4443-8c9e-bd1265c48a69">
+			<ee:message>
+				<ee:set-payload resource="dwl/db-sfdc-mapping.dwl" />
+			</ee:message>
+		</ee:transform>
+						<logger level="INFO" doc:name="Logger Before SFDC Call" doc:id="7b87db5f-424e-40d0-b4b3-fc50e893e8cd" message='#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.transactionid, 	&#10;    AppName: app.name, 	&#10;    BusinessProcessName:  "Customer Registration", 	&#10;    Category:  "Customer", 	&#10;    OriginatingApplication:  "Process Flows", 	&#10;    DesinationApplication:  "SFDC", 	 	&#10;    txnState:  "SFDC Request" &#10;}]'/>
+						<http:request method="PATCH" doc:name="HTTP : Update Customers in Salesforce" doc:id="f0d27e0e-db45-4b9a-b3c1-e4210081ae83" config-ref="HTTP_Customer_SAPI_Request_configuration" path="${sapi.pathCustomer}" >
+							<http:headers ><![CDATA[#[{
+	
+	transactionId : vars.transactionId,
+	clientId : p('secure::clientId'),
+	clientSecret : p('secure::clientSecret')
+}]]]></http:headers>
+						</http:request>
+						<logger level="INFO" doc:name="Logger After SFDC Call" doc:id="51df1765-1268-40b3-9d05-6d1dcfc5be63" message='#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.transactionid, 	&#10;    AppName: app.name, 	&#10;    BusinessProcessName:  "Customer Registration", 	&#10;    Category:  "Customer", 	&#10;    OriginatingApplication:  "Process Flows", 	&#10;    DesinationApplication:  "SFDC", 	 	&#10;    txnState:  "SFDC Response" &#10;}]'/>
+						<choice doc:name="Choice" doc:id="57dc3763-a059-4f87-a795-9135d1ac5260" >
+							<when expression="#[payload.customerResponse.*status contains false]">
+								<ee:transform doc:name="failed Record" doc:id="4c5019ce-a91a-4e05-9150-9be965d60f14">
+							<ee:message>
+								<ee:set-payload resource="dwl/failed_records.dwl" />
+							</ee:message>
+						</ee:transform>
+								<email:send doc:name="Failed Records Email" doc:id="6c69b76f-cfe8-4f4e-95ce-e4a242e4f33f" config-ref="Email_SMTP" fromAddress="${email.from.address}" subject="${email.subject}" attachmentsContentTransferEncoding="${email.encoding}">
+							<email:to-addresses>
+								<email:to-address value="${email.to.address}" />
+							</email:to-addresses>
+							<email:body contentTransferEncoding="${email.encoding}" />
+						</email:send>
+							</when>
+						</choice>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+		</batch:job>
+	</flow>
+</mule>
