@@ -17,7 +17,7 @@ http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/em
 		<logger level="INFO" doc:name="Customer Process Flow : Update process started " doc:id="d132c352-fb05-4c7f-b2ec-2cd65ba5576e" message="Customer Process Flow : Update process started "/>
 		<set-variable value="#[uuid()]" doc:name="Set transactionId" doc:id="0e100c43-1178-4ac1-abcd-ed11617f3abf" variableName="transactionId"/>
 		<logger level="INFO" doc:name="Logger Before DB Call" doc:id="b0d6d928-2e75-463e-a6d7-1791ba34d3bb" message='#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.transactionid, 	&#10;    AppName: app.name, 	&#10;    BusinessProcessName:  "Customer Registration", 	&#10;    Category:  "Customer", 	&#10;    OriginatingApplication:  "Process Flows", 	&#10;    DesinationApplication:  "DB", 	&#10;    txnState:  "DB Request" &#10;}]'/>
-		<http:request method="GET" doc:name="HTTP : Get Customers from DB" doc:id="7a22dfbb-a481-4596-a0a7-6004d7df026e" config-ref="HTTP_Customer_SAPI_Request_configuration" path="${sapi.pathCustomerStatus}">
+		<http:request method="GET" doc:name="HTTP : Get Customers from SFDC" doc:id="7a22dfbb-a481-4596-a0a7-6004d7df026e" config-ref="HTTP_Customer_SAPI_Request_configuration" path="${sapi.pathCustomer}" responseTimeout="900000000">
 			<http:headers ><![CDATA[#[{
 	
 	transactionId : vars.transactionId,
@@ -25,11 +25,11 @@ http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/em
 	clientSecret : p('secure::clientSecret')
 }]]]></http:headers>
 			<http:query-params ><![CDATA[#[{
-	lastModifiedDateTime : vars.lastModifiedDate
+	status : "false"
 }]]]></http:query-params>
 		</http:request>
 		<logger level="INFO" doc:name="Logger After DB Call" doc:id="c02c8de5-b96b-4f7f-be42-345012356049" message='#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.transactionid, 	&#10;    AppName: app.name, 	&#10;    BusinessProcessName:  "Customer Registration", 	&#10;    Category:  "Customer", 	&#10;    OriginatingApplication:  "Process Flows", 	&#10;    DesinationApplication:  "DB", 		&#10;    txnState:  "DB Response" &#10;}]' />
-		<ee:transform doc:name="JSON to JAVA Object" doc:id="f3ab6555-c817-4b3f-81a7-c6600a9af774" >
+<ee:transform doc:name="JSON to JAVA Object" doc:id="1b46bd9b-fc6c-4380-bb2b-9f3fa3701094" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/java
@@ -52,7 +52,7 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 						<logger level="INFO" doc:name="Logger Before SFDC Call" doc:id="7b87db5f-424e-40d0-b4b3-fc50e893e8cd" message='#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.transactionid, 	&#10;    AppName: app.name, 	&#10;    BusinessProcessName:  "Customer Registration", 	&#10;    Category:  "Customer", 	&#10;    OriginatingApplication:  "Process Flows", 	&#10;    DesinationApplication:  "SFDC", 	 	&#10;    txnState:  "SFDC Request" &#10;}]'/>
-						<http:request method="PATCH" doc:name="HTTP : Update Customers in Salesforce" doc:id="f0d27e0e-db45-4b9a-b3c1-e4210081ae83" config-ref="HTTP_Customer_SAPI_Request_configuration" path="${sapi.pathCustomer}" >
+						<http:request method="POST" doc:name="HTTP : POST Customer Details To DataBase" doc:id="f0d27e0e-db45-4b9a-b3c1-e4210081ae83" config-ref="HTTP_Customer_SAPI_Request_configuration" path="${sapi.pathCustomerStatus}" responseTimeout="90000000">
 							<http:headers ><![CDATA[#[{
 	
 	transactionId : vars.transactionId,

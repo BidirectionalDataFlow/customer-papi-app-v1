@@ -23,7 +23,7 @@ http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/em
 		</os:retrieve>
 		<set-variable value="02-04-2022T12:23:01" doc:name="Set Variable" doc:id="0842f269-1358-46f8-8f54-60914ca4217d" variableName="lastModifiedDate"/>
 		<logger level="INFO" doc:name="Logger Before DB Call" doc:id="b0d6d928-2e75-463e-a6d7-1791ba34d3bb" message='#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.transactionid, 	&#10;    AppName: app.name, 	&#10;    BusinessProcessName:  "Customer Registration", 	&#10;    Category:  "Customer", 	&#10;    OriginatingApplication:  "Process Flows", 	&#10;    DesinationApplication:  "DB", 	&#10;    txnState:  "DB Request" &#10;}]'/>
-		<http:request method="GET" doc:name="HTTP : Get Customers from DB" doc:id="7a22dfbb-a481-4596-a0a7-6004d7df026e" config-ref="HTTP_Customer_SAPI_Request_configuration" path="${sapi.pathCustomerStatus}">
+		<http:request method="GET" doc:name="HTTP : Get Customers from DB" doc:id="7a22dfbb-a481-4596-a0a7-6004d7df026e" config-ref="HTTP_Customer_SAPI_Request_configuration" path="${sapi.pathCustomerStatus}" responseTimeout="90000000">
 			<http:headers ><![CDATA[#[{
 	
 	transactionId : vars.transactionId,
@@ -61,7 +61,7 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 						<logger level="INFO" doc:name="Logger Before SFDC Call" doc:id="7b87db5f-424e-40d0-b4b3-fc50e893e8cd" message='#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.transactionid, 	&#10;    AppName: app.name, 	&#10;    BusinessProcessName:  "Customer Registration", 	&#10;    Category:  "Customer", 	&#10;    OriginatingApplication:  "Process Flows", 	&#10;    DesinationApplication:  "SFDC", 	 	&#10;    txnState:  "SFDC Request" &#10;}]'/>
-						<http:request method="PATCH" doc:name="HTTP : Update Customers in Salesforce" doc:id="f0d27e0e-db45-4b9a-b3c1-e4210081ae83" config-ref="HTTP_Customer_SAPI_Request_configuration" path="${sapi.pathCustomer}" >
+						<http:request method="PATCH" doc:name="HTTP : Update Customers in Salesforce" doc:id="f0d27e0e-db45-4b9a-b3c1-e4210081ae83" config-ref="HTTP_Customer_SAPI_Request_configuration" path="${sapi.pathCustomer}" responseTimeout="9000000">
 							<http:headers ><![CDATA[#[{
 	
 	transactionId : vars.transactionId,
